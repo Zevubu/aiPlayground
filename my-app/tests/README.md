@@ -32,3 +32,7 @@ Repeat for the next behavior. For this app, prefer adding tests next to new logi
 - Name files `*.test.ts` (or `*.test.tsx` for React components).
 - Prefer importing from `vitest`: `import { describe, it, expect, vi } from "vitest"`.
 - Do not call live LLM APIs in automated tests; mock at the network or provider boundary when needed.
+
+## API rate limits
+
+`POST /api/chat` is rate-limited per client IP (RPM + estimated TPM). See [`.env.example`](../.env.example) for tunables. Optional **Upstash Redis** enables shared limits across serverless instances. Vitest coverage for helpers lives under `tests/unit/lib/rate-limit/`.

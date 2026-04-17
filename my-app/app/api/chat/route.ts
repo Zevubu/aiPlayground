@@ -8,6 +8,7 @@ import {
   resolveTemperature,
   systemPromptFromBody,
 } from "@/lib/chat-params";
+import { enforceChatRateLimit } from "@/lib/rate-limit/check";
 import type { PlaygroundDebugMetadata } from "@/lib/playground-types";
 
 export const maxDuration = 60;
@@ -40,6 +41,11 @@ export async function POST(req: Request) {
 
   if (!Array.isArray(messages)) {
     return Response.json({ error: "Expected messages array" }, { status: 400 });
+  }
+
+  const rate = await enforceChatRateLimit(req, { messages, system, maxTokens });
+  if (!rate.allowed) {
+    return rate.response;
   }
 
   const modelId = resolveModelId(model);
@@ -85,6 +91,7 @@ export async function POST(req: Request) {
     });
 
     return result.toUIMessageStreamResponse({
+      headers: rate.headers,
       originalMessages: messages,
       messageMetadata: ({ part }) => {
         if (part.type === "finish") {

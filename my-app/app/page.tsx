@@ -18,6 +18,7 @@ export default function Home() {
   const [system, setSystem] = useState("");
   const [maxOutputTokens, setMaxOutputTokens] = useState<number | "">("");
   const [lastDebug, setLastDebug] = useState<PlaygroundDebugMetadata | null>(null);
+  const [rateLimitNotice, setRateLimitNotice] = useState<string | null>(null);
 
   const transport = useMemo(
     () =>
@@ -42,6 +43,13 @@ export default function Home() {
       const d = message.metadata?.debug;
       if (d) setLastDebug(d);
     },
+    onError: (e) => {
+      if (/rate limit|429|too many requests/i.test(e.message)) {
+        setRateLimitNotice(
+          "Rate limit reached. Wait a bit or lower traffic, then try again (see Retry-After from the API).",
+        );
+      }
+    },
   });
 
   const busy = status === "submitted" || status === "streaming";
@@ -51,10 +59,11 @@ export default function Home() {
       e.preventDefault();
       const form = e.currentTarget;
       const field = form.elements.namedItem("prompt") as HTMLTextAreaElement;
-      const text = field.value.trim();
-      if (!text || busy) return;
-      field.value = "";
-      await sendMessage({ text });
+    const text = field.value.trim();
+    if (!text || busy) return;
+    field.value = "";
+    setRateLimitNotice(null);
+    await sendMessage({ text });
     },
     [busy, sendMessage],
   );
@@ -113,6 +122,11 @@ export default function Home() {
           ))}
         </div>
 
+        {rateLimitNotice ? (
+          <div className="shrink-0 border-t border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+            {rateLimitNotice}
+          </div>
+        ) : null}
         {error ? (
           <div className="shrink-0 border-t border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/50 dark:text-red-200">
             {error.message}

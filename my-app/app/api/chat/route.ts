@@ -1,18 +1,20 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import {
+  DEFAULT_OPENAI_BASE_URL,
+  normalizeBaseUrl,
+  resolveMaxOutputTokens,
+  resolveModelId,
+  resolveTemperature,
+  systemPromptFromBody,
+} from "@/lib/chat-params";
 import type { PlaygroundDebugMetadata } from "@/lib/playground-types";
 
 export const maxDuration = 60;
 
-const defaultBaseUrl = "https://api.openai.com/v1";
-
-function normalizeBaseUrl(url: string) {
-  return url.replace(/\/$/, "");
-}
-
 const openaiProvider = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY ?? "",
-  baseURL: normalizeBaseUrl(process.env.OPENAI_BASE_URL ?? defaultBaseUrl),
+  baseURL: normalizeBaseUrl(process.env.OPENAI_BASE_URL ?? DEFAULT_OPENAI_BASE_URL),
 });
 
 type ChatRequestBody = {
@@ -40,7 +42,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "Expected messages array" }, { status: 400 });
   }
 
-  const modelId = typeof model === "string" && model.trim() ? model.trim() : "gpt-4o-mini";
+  const modelId = resolveModelId(model);
   const requestStart = Date.now();
   let firstTokenAt: number | null = null;
 
@@ -52,11 +54,9 @@ export async function POST(req: Request) {
     return Response.json({ error: message }, { status: 400 });
   }
 
-  const systemPrompt = typeof system === "string" ? system : "";
-  const maxOutputTokens =
-    typeof maxTokens === "number" && Number.isFinite(maxTokens) ? maxTokens : undefined;
-  const temp =
-    typeof temperature === "number" && Number.isFinite(temperature) ? temperature : undefined;
+  const systemPrompt = systemPromptFromBody(system);
+  const maxOutputTokens = resolveMaxOutputTokens(maxTokens);
+  const temp = resolveTemperature(temperature);
 
   const requestSummary: PlaygroundDebugMetadata["requestSummary"] = {
     model: modelId,

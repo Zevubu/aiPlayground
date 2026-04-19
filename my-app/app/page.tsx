@@ -3,6 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useCallback, useMemo, useState } from "react";
+import { ModelSelect } from "@/components/model-select";
 import { PlaygroundDebugDetailsBody, textFromMessage } from "@/components/playground-debug-details";
 import type { PlaygroundDebugMetadata, PlaygroundUIMessage } from "@/lib/playground-types";
 
@@ -160,13 +161,7 @@ export default function Home() {
             <label htmlFor="model" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
               Model
             </label>
-            <input
-              id="model"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              disabled={busy}
-              className="w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 font-mono text-xs outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-950 dark:focus:ring-zinc-600"
-            />
+            <ModelSelect id="model" value={model} onChange={setModel} disabled={busy} />
           </div>
           <div className="space-y-1">
             <div className="flex justify-between">

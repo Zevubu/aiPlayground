@@ -3,6 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useCallback, useMemo, useState } from "react";
+import { ModelSelect } from "@/components/model-select";
 import { PlaygroundDebugDetailsBody, textFromMessage } from "@/components/playground-debug-details";
 import type { PlaygroundDebugMetadata, PlaygroundUIMessage } from "@/lib/playground-types";
 
@@ -259,25 +260,13 @@ export default function ComparePage() {
             <label htmlFor="model-a" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
               Model A
             </label>
-            <input
-              id="model-a"
-              value={modelA}
-              onChange={(e) => setModelA(e.target.value)}
-              disabled={busy}
-              className="w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 font-mono text-xs outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-950 dark:focus:ring-zinc-600"
-            />
+            <ModelSelect id="model-a" value={modelA} onChange={setModelA} disabled={busy} />
           </div>
           <div className="space-y-1">
             <label htmlFor="model-b" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
               Model B
             </label>
-            <input
-              id="model-b"
-              value={modelB}
-              onChange={(e) => setModelB(e.target.value)}
-              disabled={busy}
-              className="w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 font-mono text-xs outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-950 dark:focus:ring-zinc-600"
-            />
+            <ModelSelect id="model-b" value={modelB} onChange={setModelB} disabled={busy} />
           </div>
           <div className="space-y-1">
             <div className="flex justify-between">

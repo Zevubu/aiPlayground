@@ -3,14 +3,8 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useCallback, useMemo, useState } from "react";
+import { PlaygroundDebugDetailsBody, textFromMessage } from "@/components/playground-debug-details";
 import type { PlaygroundDebugMetadata, PlaygroundUIMessage } from "@/lib/playground-types";
-
-function textFromMessage(m: PlaygroundUIMessage) {
-  return m.parts
-    .filter((p): p is { type: "text"; text: string } => p.type === "text")
-    .map((p) => p.text)
-    .join("");
-}
 
 export default function Home() {
   const [model, setModel] = useState("gpt-4o-mini");
@@ -59,11 +53,11 @@ export default function Home() {
       e.preventDefault();
       const form = e.currentTarget;
       const field = form.elements.namedItem("prompt") as HTMLTextAreaElement;
-    const text = field.value.trim();
-    if (!text || busy) return;
-    field.value = "";
-    setRateLimitNotice(null);
-    await sendMessage({ text });
+      const text = field.value.trim();
+      if (!text || busy) return;
+      field.value = "";
+      setRateLimitNotice(null);
+      await sendMessage({ text });
     },
     [busy, sendMessage],
   );
@@ -74,7 +68,7 @@ export default function Home() {
   }, [setMessages]);
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-zinc-50 font-sans text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 lg:flex-row">
+    <div className="flex min-h-0 flex-1 flex-col bg-zinc-50 font-sans text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 lg:flex-row">
       <main className="flex min-h-0 flex-1 flex-col border-zinc-200 dark:border-zinc-800 lg:border-r">
         <header className="flex shrink-0 items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
           <h1 className="text-sm font-semibold tracking-tight">Chat</h1>
@@ -233,41 +227,7 @@ export default function Home() {
               Debug
             </summary>
             <div className="max-h-[min(50vh,420px)] space-y-3 overflow-y-auto px-4 py-3 font-mono text-[11px] leading-relaxed text-zinc-700 dark:text-zinc-300">
-              {lastDebug ? (
-                <>
-                  <section>
-                    <h3 className="mb-1 text-[10px] font-semibold uppercase text-zinc-500">Timings (ms)</h3>
-                    <ul className="space-y-0.5">
-                      <li>Total: {lastDebug.timings.totalMs}</li>
-                      <li>TTFB (first token): {lastDebug.timings.ttffMs ?? "—"}</li>
-                    </ul>
-                  </section>
-                  <section>
-                    <h3 className="mb-1 text-[10px] font-semibold uppercase text-zinc-500">Usage</h3>
-                    <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded bg-zinc-100 p-2 dark:bg-zinc-950">
-                      {JSON.stringify(lastDebug.usage ?? {}, null, 2)}
-                    </pre>
-                  </section>
-                  <section>
-                    <h3 className="mb-1 text-[10px] font-semibold uppercase text-zinc-500">Finish</h3>
-                    <p>{lastDebug.finishReason ?? "—"}</p>
-                  </section>
-                  <details className="rounded border border-zinc-200 dark:border-zinc-700">
-                    <summary className="cursor-pointer px-2 py-1 text-[10px] font-medium">Request summary</summary>
-                    <pre className="max-h-40 overflow-auto border-t border-zinc-200 p-2 dark:border-zinc-700">
-                      {JSON.stringify(lastDebug.requestSummary, null, 2)}
-                    </pre>
-                  </details>
-                  <details className="rounded border border-zinc-200 dark:border-zinc-700">
-                    <summary className="cursor-pointer px-2 py-1 text-[10px] font-medium">Full debug JSON</summary>
-                    <pre className="max-h-48 overflow-auto border-t border-zinc-200 p-2 dark:border-zinc-700">
-                      {JSON.stringify(lastDebug, null, 2)}
-                    </pre>
-                  </details>
-                </>
-              ) : (
-                <p className="text-zinc-500">Run a completion to see timings, usage, and request summary.</p>
-              )}
+              <PlaygroundDebugDetailsBody debug={lastDebug} />
             </div>
           </details>
         </div>
